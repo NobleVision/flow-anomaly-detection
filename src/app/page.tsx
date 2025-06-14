@@ -29,7 +29,7 @@ export default function Dashboard() {
   useEffect(() => {
     const initializeData = () => {
       // Generate initial topology
-      const initialTopology = dataGenerator.generateTopology(30);
+      const initialTopology = dataGenerator.generateTopology();
       setTopology(initialTopology);
 
       // Generate some initial anomalies and alarms
