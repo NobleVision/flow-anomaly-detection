@@ -1,103 +1,184 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState, useEffect } from 'react';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { MetricsOverview } from '@/components/dashboard/MetricsOverview';
+import { NetworkVisualization } from '@/components/3d/NetworkVisualization';
+import { AnomalyList } from '@/components/dashboard/AnomalyList';
+import { AlarmPanel } from '@/components/dashboard/AlarmPanel';
+import { FlowAnalytics } from '@/components/dashboard/FlowAnalytics';
+import { dataGenerator } from '@/lib/data-generator';
+import { NetworkTopology, AnomalyDetection, Alarm, DashboardMetrics } from '@/types';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function Dashboard() {
+  const [topology, setTopology] = useState<NetworkTopology | null>(null);
+  const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
+  const [alarms, setAlarms] = useState<Alarm[]>([]);
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    totalFlows: 0,
+    anomaliesDetected: 0,
+    activeAlarms: 0,
+    networkHealth: 95,
+    throughput: { current: 0, average: 0, peak: 0 },
+    latency: { current: 0, average: 0, p95: 0 },
+    topTalkers: [],
+  });
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  // Initialize dashboard data
+  useEffect(() => {
+    const initializeData = () => {
+      // Generate initial topology
+      const initialTopology = dataGenerator.generateTopology(30);
+      setTopology(initialTopology);
+
+      // Generate some initial anomalies and alarms
+      const initialAnomalies: AnomalyDetection[] = [];
+      const initialAlarms: Alarm[] = [];
+
+      for (let i = 0; i < 5; i++) {
+        const flow = dataGenerator.generateFlow(true);
+        const anomaly = dataGenerator.generateAnomaly(flow);
+        const alarm = dataGenerator.generateAlarm(anomaly);
+
+        initialAnomalies.push(anomaly);
+        initialAlarms.push(alarm);
+      }
+
+      setAnomalies(initialAnomalies);
+      setAlarms(initialAlarms);
+
+      // Update metrics
+      setMetrics(prev => ({
+        ...prev,
+        totalFlows: 1247,
+        anomaliesDetected: initialAnomalies.length,
+        activeAlarms: initialAlarms.filter(a => a.status === 'open').length,
+        throughput: { current: 156.7, average: 142.3, peak: 289.1 },
+        latency: { current: 12.4, average: 15.2, p95: 28.7 },
+        topTalkers: [
+          { ip: '192.168.1.100', bytes: 1024000, flows: 45 },
+          { ip: '10.0.1.50', bytes: 856000, flows: 32 },
+          { ip: '172.16.1.25', bytes: 743000, flows: 28 },
+        ],
+      }));
+    };
+
+    initializeData();
+  }, []);
+
+  // Simulate real-time data updates
+  useEffect(() => {
+    if (!isSimulating) return;
+
+    const interval = setInterval(() => {
+      // Generate new flow and potentially an anomaly
+      const isAnomalous = Math.random() < 0.1; // 10% chance of anomaly
+      const flow = dataGenerator.generateFlow(isAnomalous);
+
+      if (isAnomalous) {
+        const anomaly = dataGenerator.generateAnomaly(flow);
+        const alarm = dataGenerator.generateAlarm(anomaly);
+
+        setAnomalies(prev => [anomaly, ...prev.slice(0, 19)]); // Keep last 20
+        setAlarms(prev => [alarm, ...prev.slice(0, 19)]); // Keep last 20
+
+        setMetrics(prev => ({
+          ...prev,
+          anomaliesDetected: prev.anomaliesDetected + 1,
+          activeAlarms: prev.activeAlarms + 1,
+        }));
+      }
+
+      // Update metrics
+      setMetrics(prev => ({
+        ...prev,
+        totalFlows: prev.totalFlows + 1,
+        throughput: {
+          ...prev.throughput,
+          current: 120 + Math.random() * 80,
+        },
+        latency: {
+          ...prev.latency,
+          current: 10 + Math.random() * 20,
+        },
+      }));
+    }, 2000); // Update every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [isSimulating]);
+
+  const startSimulation = () => setIsSimulating(true);
+  const stopSimulation = () => setIsSimulating(false);
+
+  const startDDoSDemo = () => {
+    // Simulate DDoS attack
+    const targetIp = '192.168.1.100';
+    const attack = dataGenerator.generateDDoSAttack(targetIp, 60);
+
+    // Generate multiple anomalies quickly
+    for (let i = 0; i < 10; i++) {
+      setTimeout(() => {
+        const flow = dataGenerator.generateFlow(true);
+        flow.destinationIp = targetIp;
+        flow.bytes = 5000000 + Math.random() * 5000000; // Large volume
+
+        const anomaly = dataGenerator.generateAnomaly(flow);
+        anomaly.type = 'volume';
+        anomaly.severity = 'critical';
+        anomaly.description = `DDoS attack detected: Massive traffic volume to ${targetIp}`;
+
+        const alarm = dataGenerator.generateAlarm(anomaly);
+        alarm.title = 'CRITICAL: DDoS Attack Detected';
+        alarm.severity = 'critical';
+
+        setAnomalies(prev => [anomaly, ...prev]);
+        setAlarms(prev => [alarm, ...prev]);
+      }, i * 500); // Stagger the anomalies
+    }
+  };
+
+  if (!topology) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Initializing Network Topology...</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <DashboardHeader
+        onStartSimulation={startSimulation}
+        onStopSimulation={stopSimulation}
+        onStartDDoSDemo={startDDoSDemo}
+        isSimulating={isSimulating}
+      />
+
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Metrics Overview */}
+        <MetricsOverview metrics={metrics} />
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Network Visualization - Takes up 2 columns */}
+          <div className="lg:col-span-2">
+            <NetworkVisualization topology={topology} anomalies={anomalies} />
+          </div>
+
+          {/* Side Panel */}
+          <div className="space-y-6">
+            <AlarmPanel alarms={alarms} />
+            <AnomalyList anomalies={anomalies.slice(0, 5)} />
+          </div>
+        </div>
+
+        {/* Flow Analytics */}
+        <FlowAnalytics metrics={metrics} />
+      </div>
     </div>
   );
 }
