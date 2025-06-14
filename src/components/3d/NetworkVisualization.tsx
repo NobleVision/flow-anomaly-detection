@@ -272,7 +272,8 @@ function NetworkEdgeComponent({
   const getLineWidth = () => {
     const baseWidth = 1;
     const utilizationMultiplier = 1 + (utilization / 100) * 2;
-    return Math.max(baseWidth, baseWidth * utilizationMultiplier);
+    const bandwidthMultiplier = bandwidth ? Math.log10(bandwidth / 100 + 1) : 1;
+    return Math.max(baseWidth, baseWidth * utilizationMultiplier * bandwidthMultiplier);
   };
 
   const points = useMemo(() => [
