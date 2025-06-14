@@ -11,8 +11,7 @@ import {
   Zap, 
   TrendingUp, 
   Clock,
-  Network,
-  Users
+  Network
 } from 'lucide-react';
 
 interface MetricsOverviewProps {

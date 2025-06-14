@@ -80,8 +80,6 @@ export function AlarmPanel({ alarms }: AlarmPanelProps) {
   };
 
   const openAlarms = alarms.filter(alarm => alarm.status === 'open');
-  const acknowledgedAlarms = alarms.filter(alarm => alarm.status === 'acknowledged');
-  const investigatingAlarms = alarms.filter(alarm => alarm.status === 'investigating');
 
   return (
     <Card className="h-[400px] flex flex-col">

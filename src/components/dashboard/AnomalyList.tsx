@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AnomalyDetection } from '@/types';
-import { formatRelativeTime, getSeverityColor } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
 import { 
   AlertTriangle, 
   TrendingUp, 

@@ -1,13 +1,13 @@
 'use client';
 
 import { Suspense, useRef, useMemo, useState, useCallback } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Sphere, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NetworkTopology, AnomalyDetection, NetworkNode } from '@/types';
-import { formatBytes } from '@/lib/utils';
+
 
 interface NetworkVisualizationProps {
   topology: NetworkTopology;
@@ -248,13 +248,13 @@ function NetworkEdgeComponent({
   start,
   end,
   status,
-  bandwidth = 0,
+
   utilization = 0
 }: {
   start: [number, number, number];
   end: [number, number, number];
   status: string;
-  bandwidth?: number;
+
   utilization?: number;
 }) {
   const lineRef = useRef<THREE.Line>(null);
@@ -316,7 +316,6 @@ function DataFlowParticle({
   delay?: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const trailRef = useRef<THREE.Points>(null);
   const [trailPositions, setTrailPositions] = useState<THREE.Vector3[]>([]);
 
   useFrame((state) => {

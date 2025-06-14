@@ -1,16 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { DashboardMetrics } from '@/types';
 import { formatNumber } from '@/lib/utils';
 import {
   TrendingUp,
   Activity,
   Zap,
-  Globe,
-  Shield,
-  Clock
+  Shield
 } from 'lucide-react';
 
 interface FlowAnalyticsProps {

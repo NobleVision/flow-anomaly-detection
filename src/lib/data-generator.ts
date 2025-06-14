@@ -7,7 +7,7 @@ import {
   NetworkEdge,
   AttackScenario 
 } from '@/types';
-import { generateRandomIP, generateId } from './utils';
+import { generateRandomIP } from './utils';
 
 // Predefined IP ranges for realistic network simulation
 const INTERNAL_SUBNETS = [
@@ -36,7 +36,7 @@ export class NetworkDataGenerator {
   private alarmCounter = 0;
 
   // Generate realistic enterprise network topology
-  generateTopology(nodeCount: number = 25): NetworkTopology {
+  generateTopology(): NetworkTopology {
     const nodes: NetworkNode[] = [];
     const edges: NetworkEdge[] = [];
 

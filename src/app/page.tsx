@@ -114,7 +114,7 @@ export default function Dashboard() {
   const startDDoSDemo = () => {
     // Simulate DDoS attack
     const targetIp = '192.168.1.100';
-    const attack = dataGenerator.generateDDoSAttack(targetIp, 60);
+    dataGenerator.generateDDoSAttack(targetIp, 60);
 
     // Generate multiple anomalies quickly
     for (let i = 0; i < 10; i++) {

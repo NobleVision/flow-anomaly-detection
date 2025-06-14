@@ -74,7 +74,7 @@ export interface AlarmAction {
   user: string;
   timestamp: Date;
   comment?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NetworkTopology {
@@ -143,7 +143,7 @@ export interface ChartData {
 // WebSocket message types
 export interface WebSocketMessage {
   type: 'flow' | 'anomaly' | 'alarm' | 'metrics' | 'topology';
-  data: any;
+  data: unknown;
   timestamp: Date;
 }
 
