@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Play, 
-  Square, 
-  Zap, 
-  Shield, 
-  Activity, 
+import {
+  Play,
+  Square,
+  Zap,
+  Shield,
+  Activity,
   Settings,
   Bell,
   User
@@ -28,6 +29,16 @@ export function DashboardHeader({
   isSimulating
 }: DashboardHeaderProps) {
   const [notifications] = useState(3);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const navigationItems = [
+    { name: 'Overview', path: '/', active: pathname === '/' },
+    { name: 'Network Topology', path: '/network-topology', active: pathname === '/network-topology' },
+    { name: 'Anomaly Analysis', path: '/anomaly-analysis', active: pathname === '/anomaly-analysis' },
+    { name: 'Flow Analytics', path: '/flow-analytics', active: pathname === '/flow-analytics' },
+    { name: 'ML Models', path: '/ml-models', active: pathname === '/ml-models' },
+  ];
 
   return (
     <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -134,21 +145,19 @@ export function DashboardHeader({
         {/* Secondary Navigation */}
         <div className="mt-4 flex items-center justify-between">
           <nav className="flex space-x-6">
-            <button className="text-sm font-medium text-primary border-b-2 border-primary pb-2">
-              Overview
-            </button>
-            <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors pb-2">
-              Network Topology
-            </button>
-            <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors pb-2">
-              Anomaly Analysis
-            </button>
-            <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors pb-2">
-              Flow Analytics
-            </button>
-            <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors pb-2">
-              ML Models
-            </button>
+            {navigationItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => router.push(item.path)}
+                className={`text-sm font-medium transition-colors pb-2 ${
+                  item.active
+                    ? 'text-primary border-b-2 border-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.name}
+              </button>
+            ))}
           </nav>
 
           {/* Time Range Selector */}
