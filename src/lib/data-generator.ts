@@ -1,11 +1,15 @@
-import { 
-  NetworkNode, 
-  NetworkFlow, 
-  AnomalyDetection, 
-  Alarm, 
+import {
+  NetworkNode,
+  NetworkFlow,
+  AnomalyDetection,
+  Alarm,
   NetworkTopology,
   NetworkEdge,
-  AttackScenario 
+  AttackScenario,
+  DashboardMetrics,
+  FlowAnalytics,
+  TimeSeriesData,
+  GeographicStats
 } from '@/types';
 import { generateRandomIP } from './utils';
 
@@ -377,6 +381,203 @@ export class NetworkDataGenerator {
     };
   }
 
+  // Generate dashboard metrics
+  generateDashboardMetrics(): DashboardMetrics {
+    const flows = Array.from({ length: 10 }, () => this.generateFlow());
+    const anomalies = Array.from({ length: 5 }, () => this.generateAnomaly(flows[0]));
+
+    return {
+      totalFlows: Math.floor(Math.random() * 10000) + 5000,
+      anomaliesDetected: anomalies.length,
+      activeAlarms: Math.floor(Math.random() * 15) + 5,
+      networkHealth: Math.floor(Math.random() * 20) + 80,
+      throughput: {
+        current: Math.random() * 1000 + 500,
+        average: Math.random() * 800 + 400,
+        peak: Math.random() * 1500 + 1000,
+      },
+      latency: {
+        current: Math.random() * 50 + 10,
+        average: Math.random() * 40 + 15,
+        p95: Math.random() * 100 + 50,
+      },
+      topTalkers: flows.slice(0, 5).map(flow => ({
+        ip: flow.sourceIp,
+        bytes: flow.bytes,
+        flows: Math.floor(Math.random() * 100) + 10,
+      })),
+    };
+  }
+
+  // Generate comprehensive flow analytics
+  generateFlowAnalytics(flowCount: number = 1000): FlowAnalytics {
+    const flows = Array.from({ length: flowCount }, () => this.generateFlow());
+
+    const totalFlows = flows.length;
+    const totalBytes = flows.reduce((sum, flow) => sum + flow.bytes, 0);
+    const totalPackets = flows.reduce((sum, flow) => sum + flow.packets, 0);
+    const averageFlowDuration = flows.reduce((sum, flow) => sum + flow.duration, 0) / totalFlows;
+
+    // Protocol analysis
+    const protocolMap = new Map<string, { flows: number; bytes: number; packets: number }>();
+    flows.forEach(flow => {
+      const existing = protocolMap.get(flow.protocol) || { flows: 0, bytes: 0, packets: 0 };
+      protocolMap.set(flow.protocol, {
+        flows: existing.flows + 1,
+        bytes: existing.bytes + flow.bytes,
+        packets: existing.packets + flow.packets
+      });
+    });
+
+    const topProtocols = Array.from(protocolMap.entries()).map(([protocol, stats]) => ({
+      protocol,
+      ...stats,
+      percentage: (stats.bytes / totalBytes) * 100
+    })).sort((a, b) => b.bytes - a.bytes);
+
+    // Port analysis
+    const portMap = new Map<number, { flows: number; bytes: number; service: string }>();
+    flows.forEach(flow => {
+      const port = flow.destinationPort;
+      const existing = portMap.get(port) || { flows: 0, bytes: 0, service: this.getServiceName(port) };
+      portMap.set(port, {
+        flows: existing.flows + 1,
+        bytes: existing.bytes + flow.bytes,
+        service: existing.service
+      });
+    });
+
+    const topPorts = Array.from(portMap.entries()).map(([port, stats]) => ({
+      port,
+      ...stats,
+      percentage: (stats.bytes / totalBytes) * 100
+    })).sort((a, b) => b.bytes - a.bytes).slice(0, 10);
+
+    // Top talkers analysis
+    const talkerMap = new Map<string, { inbound: number; outbound: number; flows: number }>();
+    flows.forEach(flow => {
+      // Source IP (outbound)
+      const sourceStats = talkerMap.get(flow.sourceIp) || { inbound: 0, outbound: 0, flows: 0 };
+      talkerMap.set(flow.sourceIp, {
+        ...sourceStats,
+        outbound: sourceStats.outbound + flow.bytes,
+        flows: sourceStats.flows + 1
+      });
+
+      // Destination IP (inbound)
+      const destStats = talkerMap.get(flow.destinationIp) || { inbound: 0, outbound: 0, flows: 0 };
+      talkerMap.set(flow.destinationIp, {
+        ...destStats,
+        inbound: destStats.inbound + flow.bytes
+      });
+    });
+
+    const topTalkers = Array.from(talkerMap.entries()).map(([ip, stats]) => ({
+      ip,
+      hostname: this.generateHostname(ip),
+      inboundBytes: stats.inbound,
+      outboundBytes: stats.outbound,
+      totalBytes: stats.inbound + stats.outbound,
+      flows: stats.flows,
+      percentage: ((stats.inbound + stats.outbound) / totalBytes) * 100,
+      location: this.getLocationFromIP(ip)
+    })).sort((a, b) => b.totalBytes - a.totalBytes).slice(0, 15);
+
+    // Bandwidth utilization
+    const currentBandwidth = flows.slice(-10).reduce((sum, flow) => sum + flow.bytes, 0) / 10;
+    const averageBandwidth = totalBytes / totalFlows;
+    const peakBandwidth = Math.max(...flows.map(flow => flow.bytes));
+
+    const bandwidthUtilization = {
+      current: currentBandwidth,
+      average: averageBandwidth,
+      peak: peakBandwidth,
+      utilization: Math.min((currentBandwidth / (peakBandwidth || 1)) * 100, 100),
+      capacity: peakBandwidth * 1.2,
+      trend: currentBandwidth > averageBandwidth ? 'increasing' as const :
+             currentBandwidth < averageBandwidth * 0.8 ? 'decreasing' as const : 'stable' as const
+    };
+
+    // Flow trends (time series)
+    const flowTrends = this.generateFlowTrends(flows);
+
+    // Geographic distribution
+    const geographicDistribution = this.generateGeographicDistribution(flows);
+
+    return {
+      totalFlows,
+      totalBytes,
+      totalPackets,
+      averageFlowDuration,
+      topProtocols,
+      topPorts,
+      topTalkers,
+      bandwidthUtilization,
+      flowTrends,
+      geographicDistribution
+    };
+  }
+
+  private getServiceName(port: number): string {
+    const services: Record<number, string> = {
+      80: 'HTTP', 443: 'HTTPS', 22: 'SSH', 21: 'FTP', 25: 'SMTP',
+      53: 'DNS', 110: 'POP3', 143: 'IMAP', 993: 'IMAPS', 995: 'POP3S',
+      3389: 'RDP', 1433: 'SQL Server', 3306: 'MySQL', 5432: 'PostgreSQL',
+      6379: 'Redis', 27017: 'MongoDB', 9200: 'Elasticsearch'
+    };
+    return services[port] || 'Unknown';
+  }
+
+  private generateHostname(ip: string): string {
+    const hash = ip.split('.').reduce((acc, octet) => acc + parseInt(octet), 0);
+    const hostnames = ['web-server', 'db-server', 'app-server', 'mail-server', 'dns-server', 'file-server'];
+    return `${hostnames[hash % hostnames.length]}-${hash % 100}`;
+  }
+
+  private getLocationFromIP(ip: string): string {
+    const locations = ['New York, US', 'London, UK', 'Tokyo, JP', 'Sydney, AU', 'Frankfurt, DE', 'Singapore, SG'];
+    const hash = ip.split('.').reduce((acc, octet) => acc + parseInt(octet), 0);
+    return locations[hash % locations.length];
+  }
+
+  private generateFlowTrends(flows: NetworkFlow[]): TimeSeriesData[] {
+    const now = new Date();
+    const trends = [];
+    for (let i = 23; i >= 0; i--) {
+      const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
+      const hourFlows = flows.filter(flow =>
+        flow.timestamp.getHours() === timestamp.getHours()
+      );
+      trends.push({
+        timestamp,
+        value: hourFlows.reduce((sum, flow) => sum + flow.bytes, 0),
+        label: timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      });
+    }
+    return trends;
+  }
+
+  private generateGeographicDistribution(flows: NetworkFlow[]): GeographicStats[] {
+    const countries = [
+      { country: 'United States', region: 'North America', coordinates: [39.8283, -98.5795] as [number, number] },
+      { country: 'United Kingdom', region: 'Europe', coordinates: [55.3781, -3.4360] as [number, number] },
+      { country: 'Germany', region: 'Europe', coordinates: [51.1657, 10.4515] as [number, number] },
+      { country: 'Japan', region: 'Asia', coordinates: [36.2048, 138.2529] as [number, number] },
+      { country: 'Australia', region: 'Oceania', coordinates: [-25.2744, 133.7751] as [number, number] }
+    ];
+
+    return countries.map(country => {
+      const countryFlows = flows.filter(() => Math.random() > 0.7); // Simulate geographic distribution
+      const bytes = countryFlows.reduce((sum, flow) => sum + flow.bytes, 0);
+      return {
+        ...country,
+        flows: countryFlows.length,
+        bytes,
+        percentage: (bytes / flows.reduce((sum, flow) => sum + flow.bytes, 0)) * 100
+      };
+    }).filter(country => country.flows > 0);
+  }
+
   private getAnomalyDescription(type: string, severity: string): string {
     const descriptions = {
       volume: `Unusual ${severity} traffic volume detected`,
@@ -385,7 +586,7 @@ export class NetworkDataGenerator {
       geographic: `Unexpected ${severity} geographic traffic source`,
       temporal: `Anomalous ${severity} timing pattern detected`,
     };
-    
+
     return descriptions[type as keyof typeof descriptions] || 'Unknown anomaly type';
   }
 

@@ -16,17 +16,17 @@ import {
 } from 'lucide-react';
 
 interface DashboardHeaderProps {
-  onStartSimulation: () => void;
-  onStopSimulation: () => void;
-  onStartDDoSDemo: () => void;
-  isSimulating: boolean;
+  onStartSimulation?: () => void;
+  onStopSimulation?: () => void;
+  onStartDDoSDemo?: () => void;
+  isSimulating?: boolean;
 }
 
 export function DashboardHeader({
   onStartSimulation,
   onStopSimulation,
   onStartDDoSDemo,
-  isSimulating
+  isSimulating = false
 }: DashboardHeaderProps) {
   const [notifications] = useState(3);
   const pathname = usePathname();
@@ -82,40 +82,44 @@ export function DashboardHeader({
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-3">
-            {/* Demo Controls */}
-            <div className="flex items-center space-x-2">
-              {!isSimulating ? (
-                <Button
-                  onClick={onStartSimulation}
-                  variant="success"
-                  size="sm"
-                  className="glow-effect"
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  Start Simulation
-                </Button>
-              ) : (
-                <Button
-                  onClick={onStopSimulation}
-                  variant="danger"
-                  size="sm"
-                >
-                  <Square className="h-4 w-4 mr-2" />
-                  Stop Simulation
-                </Button>
-              )}
-              
-              <Button
-                onClick={onStartDDoSDemo}
-                variant="warning"
-                size="sm"
-                className="relative overflow-hidden"
-              >
-                <Zap className="h-4 w-4 mr-2" />
-                DDoS Demo
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-[shimmer_2s_infinite]" />
-              </Button>
-            </div>
+            {/* Demo Controls - Only show if handlers are provided */}
+            {(onStartSimulation || onStopSimulation || onStartDDoSDemo) && (
+              <div className="flex items-center space-x-2">
+                {!isSimulating && onStartSimulation ? (
+                  <Button
+                    onClick={onStartSimulation}
+                    variant="success"
+                    size="sm"
+                    className="glow-effect"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Simulation
+                  </Button>
+                ) : isSimulating && onStopSimulation ? (
+                  <Button
+                    onClick={onStopSimulation}
+                    variant="danger"
+                    size="sm"
+                  >
+                    <Square className="h-4 w-4 mr-2" />
+                    Stop Simulation
+                  </Button>
+                ) : null}
+
+                {onStartDDoSDemo && (
+                  <Button
+                    onClick={onStartDDoSDemo}
+                    variant="warning"
+                    size="sm"
+                    className="relative overflow-hidden"
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    DDoS Demo
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-[shimmer_2s_infinite]" />
+                  </Button>
+                )}
+              </div>
+            )}
 
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative">

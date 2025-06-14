@@ -188,3 +188,145 @@ export interface NotificationSettings {
   sound: boolean;
   severity: ('low' | 'medium' | 'high' | 'critical')[];
 }
+
+// Flow Analytics Types
+export interface FlowAnalytics {
+  totalFlows: number;
+  totalBytes: number;
+  totalPackets: number;
+  averageFlowDuration: number;
+  topProtocols: ProtocolStats[];
+  topPorts: PortStats[];
+  topTalkers: TalkerStats[];
+  bandwidthUtilization: BandwidthStats;
+  flowTrends: TimeSeriesData[];
+  geographicDistribution: GeographicStats[];
+}
+
+export interface ProtocolStats {
+  protocol: string;
+  flows: number;
+  bytes: number;
+  packets: number;
+  percentage: number;
+}
+
+export interface PortStats {
+  port: number;
+  service: string;
+  flows: number;
+  bytes: number;
+  percentage: number;
+}
+
+export interface TalkerStats {
+  ip: string;
+  hostname?: string;
+  inboundBytes: number;
+  outboundBytes: number;
+  totalBytes: number;
+  flows: number;
+  percentage: number;
+  location?: string;
+}
+
+export interface BandwidthStats {
+  current: number;
+  average: number;
+  peak: number;
+  utilization: number; // percentage
+  capacity: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+}
+
+export interface GeographicStats {
+  country: string;
+  region: string;
+  flows: number;
+  bytes: number;
+  percentage: number;
+  coordinates: [number, number];
+}
+
+// ML Model Management Types
+export interface MLModel {
+  id: string;
+  name: string;
+  type: 'anomaly_detection' | 'classification' | 'regression' | 'clustering';
+  algorithm: string;
+  version: string;
+  status: 'training' | 'deployed' | 'testing' | 'archived' | 'failed';
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+  createdAt: Date;
+  lastTrained: Date;
+  trainingDataSize: number;
+  features: string[];
+  hyperparameters: Record<string, unknown>;
+  performance: ModelPerformance;
+  deployment: ModelDeployment;
+}
+
+export interface ModelPerformance {
+  trainingAccuracy: number;
+  validationAccuracy: number;
+  testAccuracy: number;
+  confusionMatrix: number[][];
+  rocAuc: number;
+  trainingTime: number;
+  inferenceTime: number;
+  memoryUsage: number;
+  cpuUsage: number;
+}
+
+export interface ModelDeployment {
+  environment: 'development' | 'staging' | 'production';
+  endpoint: string;
+  replicas: number;
+  resources: {
+    cpu: string;
+    memory: string;
+    gpu?: string;
+  };
+  autoscaling: {
+    enabled: boolean;
+    minReplicas: number;
+    maxReplicas: number;
+    targetCpuUtilization: number;
+  };
+}
+
+export interface TrainingJob {
+  id: string;
+  modelId: string;
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+  progress: number; // 0-100
+  startTime: Date;
+  endTime?: Date;
+  duration?: number;
+  logs: string[];
+  metrics: TrainingMetrics;
+  config: TrainingConfig;
+}
+
+export interface TrainingMetrics {
+  epoch: number;
+  loss: number;
+  accuracy: number;
+  validationLoss: number;
+  validationAccuracy: number;
+  learningRate: number;
+}
+
+export interface TrainingConfig {
+  epochs: number;
+  batchSize: number;
+  learningRate: number;
+  optimizer: string;
+  lossFunction: string;
+  validationSplit: number;
+  earlyStopping: boolean;
+  patience: number;
+}
