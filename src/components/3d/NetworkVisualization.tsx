@@ -257,15 +257,8 @@ function NetworkEdgeComponent({
 
   utilization?: number;
 }) {
-  const lineRef = useRef<THREE.Line>(null);
-
-  useFrame((state) => {
-    if (lineRef.current && status === 'active') {
-      // Subtle pulsing for active connections
-      const opacity = 0.4 + Math.sin(state.clock.elapsedTime * 2) * 0.2;
-      (lineRef.current.material as THREE.LineBasicMaterial).opacity = opacity;
-    }
-  });
+  // Remove the ref since we can't directly access the Line component's material
+  // The pulsing effect will be handled through the opacity prop instead
 
   const getEdgeColor = () => {
     switch (status) {
@@ -289,7 +282,6 @@ function NetworkEdgeComponent({
 
   return (
     <Line
-      ref={lineRef}
       points={points}
       color={getEdgeColor()}
       lineWidth={getLineWidth()}
