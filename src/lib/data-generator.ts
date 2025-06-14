@@ -147,7 +147,8 @@ export class NetworkDataGenerator {
 
     // Create edges from connections
     connections.forEach(([sourceId, targetId, bandwidth, utilization], index) => {
-      const status = utilization > 85 ? 'congested' : utilization < 10 ? 'inactive' : 'active';
+      const utilizationNum = utilization as number;
+      const status = utilizationNum > 85 ? 'congested' : utilizationNum < 10 ? 'inactive' : 'active';
       edges.push({
         id: `edge-${index + 1}`,
         source: sourceId as string,
@@ -155,7 +156,7 @@ export class NetworkDataGenerator {
         type: 'physical',
         bandwidth: bandwidth as number,
         latency: Math.random() * 10 + 1,
-        utilization: utilization as number,
+        utilization: utilizationNum,
         status: status as 'active' | 'inactive' | 'congested'
       });
     });
