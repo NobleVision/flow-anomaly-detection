@@ -248,13 +248,13 @@ function NetworkEdgeComponent({
   start,
   end,
   status,
-
+  bandwidth,
   utilization = 0
 }: {
   start: [number, number, number];
   end: [number, number, number];
   status: string;
-
+  bandwidth?: number;
   utilization?: number;
 }) {
   // Remove the ref since we can't directly access the Line component's material
