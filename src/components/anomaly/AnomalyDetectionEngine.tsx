@@ -4,19 +4,15 @@ import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AnomalyDetection, NetworkFlow } from '@/types';
-import { 
-  Brain, 
-  BarChart3, 
-  TrendingUp, 
-  Zap, 
-  Shield, 
+import { AnomalyDetection } from '@/types';
+import {
+  Brain,
+  BarChart3,
+  Shield,
   Activity,
   Target,
-  AlertTriangle,
   CheckCircle,
-  XCircle,
-  Clock
+  XCircle
 } from 'lucide-react';
 
 interface DetectionAlgorithm {
@@ -36,11 +32,10 @@ interface DetectionAlgorithm {
 
 interface AnomalyDetectionEngineProps {
   anomalies: AnomalyDetection[];
-  flows: NetworkFlow[];
   onAlgorithmToggle: (algorithmId: string) => void;
 }
 
-export function AnomalyDetectionEngine({ anomalies, flows, onAlgorithmToggle }: AnomalyDetectionEngineProps) {
+export function AnomalyDetectionEngine({ anomalies, onAlgorithmToggle }: AnomalyDetectionEngineProps) {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<string | null>(null);
 
   // Mock detection algorithms with realistic performance metrics
@@ -97,8 +92,8 @@ export function AnomalyDetectionEngine({ anomalies, flows, onAlgorithmToggle }: 
       recall: 89.7,
       f1Score: 86.8,
       isActive: true,
-      detectionCount: anomalies.filter(a => a.type === 'behavioral').length,
-      falsePositives: Math.floor(anomalies.filter(a => a.type === 'behavioral').length * 0.16),
+      detectionCount: anomalies.filter(a => a.type === 'pattern').length,
+      falsePositives: Math.floor(anomalies.filter(a => a.type === 'pattern').length * 0.16),
       processingTime: 67
     },
     {

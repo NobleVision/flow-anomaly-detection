@@ -5,18 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AnomalyDetection } from '@/types';
-import { 
-  GitBranch, 
-  Target, 
-  TrendingUp, 
-  AlertTriangle,
+import {
+  GitBranch,
+  Target,
+  TrendingUp,
   Network,
-  Zap,
   Clock,
   MapPin,
   Activity,
   Brain,
-  Eye,
   Link
 } from 'lucide-react';
 
@@ -60,7 +57,7 @@ export function AnomalyCorrelation({ anomalies }: AnomalyCorrelationProps) {
 
     anomalies.forEach(anomaly => {
       // Group by 10-minute time windows
-      const timeKey = Math.floor(anomaly.timestamp.getTime() / (10 * 60 * 1000)).toString();
+      const timeKey = Math.floor(anomaly.detectedAt.getTime() / (10 * 60 * 1000)).toString();
       if (!timeGroups.has(timeKey)) timeGroups.set(timeKey, []);
       timeGroups.get(timeKey)!.push(anomaly);
 
@@ -108,8 +105,8 @@ export function AnomalyCorrelation({ anomalies }: AnomalyCorrelationProps) {
             confidence: avgConfidence,
             severity: uniqueTargets > 5 ? 'critical' : 'high',
             type: 'behavioral',
-            timeWindow: Math.max(...groupAnomalies.map(a => a.timestamp.getTime())) - 
-                       Math.min(...groupAnomalies.map(a => a.timestamp.getTime())),
+            timeWindow: Math.max(...groupAnomalies.map(a => a.detectedAt.getTime())) -
+                       Math.min(...groupAnomalies.map(a => a.detectedAt.getTime())),
             correlationScore: Math.min(0.9, 0.5 + (uniqueTargets * 0.05))
           });
         }
@@ -119,8 +116,8 @@ export function AnomalyCorrelation({ anomalies }: AnomalyCorrelationProps) {
     // Detect volumetric attack patterns
     const volumetricAnomalies = anomalies.filter(a => a.type === 'volume');
     if (volumetricAnomalies.length >= 5) {
-      const recentVolumetric = volumetricAnomalies.filter(a => 
-        Date.now() - a.timestamp.getTime() < 30 * 60 * 1000 // Last 30 minutes
+      const recentVolumetric = volumetricAnomalies.filter(a =>
+        Date.now() - a.detectedAt.getTime() < 30 * 60 * 1000 // Last 30 minutes
       );
       
       if (recentVolumetric.length >= 3) {
@@ -161,8 +158,8 @@ export function AnomalyCorrelation({ anomalies }: AnomalyCorrelationProps) {
           confidence: avgConfidence,
           severity: groupAnomalies.length > 10 ? 'high' : 'medium',
           type: 'spatial',
-          timeWindow: Math.max(...groupAnomalies.map(a => a.timestamp.getTime())) - 
-                     Math.min(...groupAnomalies.map(a => a.timestamp.getTime())),
+          timeWindow: Math.max(...groupAnomalies.map(a => a.detectedAt.getTime())) -
+                     Math.min(...groupAnomalies.map(a => a.detectedAt.getTime())),
           correlationScore: Math.min(0.8, 0.3 + (groupAnomalies.length * 0.03))
         });
       }
@@ -193,7 +190,7 @@ export function AnomalyCorrelation({ anomalies }: AnomalyCorrelationProps) {
     ipPairs.forEach(({ sourceIp, targetIp, anomalies: pairAnomalies }) => {
       if (pairAnomalies.length >= 2) {
         // Calculate time proximity (how close in time the anomalies occurred)
-        const timestamps = pairAnomalies.map(a => a.timestamp.getTime()).sort();
+        const timestamps = pairAnomalies.map(a => a.detectedAt.getTime()).sort();
         const timeSpread = timestamps[timestamps.length - 1] - timestamps[0];
         const timeProximity = Math.max(0, 1 - (timeSpread / (24 * 60 * 60 * 1000))); // Normalize to 24 hours
 

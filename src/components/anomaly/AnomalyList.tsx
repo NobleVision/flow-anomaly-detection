@@ -7,13 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AnomalyDetection } from '@/types';
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  AlertTriangle, 
-  Clock, 
-  MapPin, 
+import {
+  Search,
+  Filter,
+  Eye,
+  AlertTriangle,
+  MapPin,
   Activity,
   TrendingUp,
   Shield,
@@ -51,7 +50,7 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'timestamp' | 'severity' | 'confidence' | 'risk'>('timestamp');
+  const [sortBy, setSortBy] = useState<'detectedAt' | 'severity' | 'confidence' | 'risk'>('detectedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Enhanced severity scoring algorithm
@@ -76,7 +75,7 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
                    anomaly.type === 'pattern' ? 1.1 : 1.0,
       
       // Temporal urgency (recent anomalies are more urgent)
-      temporalUrgency: Math.max(0.8, 1.2 - ((Date.now() - anomaly.timestamp.getTime()) / (24 * 60 * 60 * 1000))),
+      temporalUrgency: Math.max(0.8, 1.2 - ((Date.now() - anomaly.detectedAt.getTime()) / (24 * 60 * 60 * 1000))),
       
       // Geographic risk (mock implementation based on IP ranges)
       geographicRisk: anomaly.sourceIp.startsWith('192.168.') ? 0.9 : // Internal
@@ -84,7 +83,7 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
                      1.2, // External
       
       // Behavioral deviation
-      behavioralDeviation: anomaly.type === 'behavioral' ? 1.2 : 
+      behavioralDeviation: anomaly.type === 'pattern' ? 1.2 :
                           anomaly.type === 'geographic' ? 1.1 : 1.0
     };
 
@@ -123,7 +122,7 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
 
   // Filter and sort anomalies
   const filteredAndSortedAnomalies = useMemo(() => {
-    let filtered = anomalies.filter(anomaly => {
+    const filtered = anomalies.filter(anomaly => {
       // Search filter
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
@@ -152,8 +151,8 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
       let comparison = 0;
 
       switch (sortBy) {
-        case 'timestamp':
-          comparison = a.timestamp.getTime() - b.timestamp.getTime();
+        case 'detectedAt':
+          comparison = a.detectedAt.getTime() - b.detectedAt.getTime();
           break;
         case 'severity':
           const severityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
@@ -189,8 +188,9 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
     switch (type) {
       case 'volume': return <TrendingUp className="w-4 h-4" />;
       case 'pattern': return <Brain className="w-4 h-4" />;
-      case 'behavioral': return <Activity className="w-4 h-4" />;
+      case 'protocol': return <Activity className="w-4 h-4" />;
       case 'geographic': return <MapPin className="w-4 h-4" />;
+      case 'temporal': return <Target className="w-4 h-4" />;
       default: return <Target className="w-4 h-4" />;
     }
   };
@@ -296,8 +296,8 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="timestamp-desc">Newest First</SelectItem>
-                <SelectItem value="timestamp-asc">Oldest First</SelectItem>
+                <SelectItem value="detectedAt-desc">Newest First</SelectItem>
+                <SelectItem value="detectedAt-asc">Oldest First</SelectItem>
                 <SelectItem value="severity-desc">Highest Severity</SelectItem>
                 <SelectItem value="severity-asc">Lowest Severity</SelectItem>
                 <SelectItem value="confidence-desc">Highest Confidence</SelectItem>
@@ -386,7 +386,7 @@ export function AnomalyList({ anomalies, onAnomalySelect, selectedAnomaly }: Ano
                         </div>
                         <div>
                           <span className="font-medium">Time:</span>
-                          <span className="ml-2">{formatTimestamp(anomaly.timestamp)}</span>
+                          <span className="ml-2">{formatTimestamp(anomaly.detectedAt)}</span>
                         </div>
                       </div>
 

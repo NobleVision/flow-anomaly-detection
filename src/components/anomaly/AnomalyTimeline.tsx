@@ -3,22 +3,14 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AnomalyDetection } from '@/types';
-import { 
-  Calendar, 
-  Clock, 
-  TrendingUp, 
+import {
+  Calendar,
+  TrendingUp,
   TrendingDown,
-  BarChart3,
-  LineChart,
   Activity,
-  AlertTriangle,
-  Zap,
-  Shield,
-  Eye,
-  Filter
+  Eye
 } from 'lucide-react';
 
 interface TimelineDataPoint {
@@ -33,11 +25,9 @@ interface TimelineDataPoint {
 
 interface AnomalyTimelineProps {
   anomalies: AnomalyDetection[];
-  timeRange: string;
-  onTimeRangeChange: (range: string) => void;
 }
 
-export function AnomalyTimeline({ anomalies, timeRange, onTimeRangeChange }: AnomalyTimelineProps) {
+export function AnomalyTimeline({ anomalies }: AnomalyTimelineProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimelineDataPoint | null>(null);
   const [viewType, setViewType] = useState<'hourly' | 'daily' | 'weekly'>('hourly');
   const [chartType, setChartType] = useState<'bar' | 'line' | 'area'>('bar');
@@ -61,8 +51,8 @@ export function AnomalyTimeline({ anomalies, timeRange, onTimeRangeChange }: Ano
       const bucketEnd = new Date(timestamp.getTime() + config.intervalMs / 2);
 
       // Filter anomalies in this time bucket
-      const bucketAnomalies = anomalies.filter(a => 
-        a.timestamp >= bucketStart && a.timestamp < bucketEnd
+      const bucketAnomalies = anomalies.filter(a =>
+        a.detectedAt >= bucketStart && a.detectedAt < bucketEnd
       );
 
       // Count by severity
@@ -149,15 +139,7 @@ export function AnomalyTimeline({ anomalies, timeRange, onTimeRangeChange }: Ano
     }
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return '#ef4444';
-      case 'high': return '#f97316';
-      case 'medium': return '#eab308';
-      case 'low': return '#3b82f6';
-      default: return '#6b7280';
-    }
-  };
+
 
   const maxCount = Math.max(...timelineData.map(d => d.count), 1);
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { AnomalyDetection, NetworkFlow, DashboardMetrics, NetworkTopology } from '@/types';
+import { AnomalyDetection } from '@/types';
 import { dataGenerator } from '@/lib/data-generator';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { AnomalyDetectionEngine } from '@/components/anomaly/AnomalyDetectionEngine';
@@ -11,27 +11,19 @@ import { AnomalyList } from '@/components/anomaly/AnomalyList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Activity, 
-  AlertTriangle, 
-  TrendingUp, 
-  TrendingDown,
-  Search, 
-  Filter,
-  Calendar,
+import {
+  AlertTriangle,
   BarChart3,
-  PieChart,
   LineChart,
-  Zap,
-  Shield,
-  Clock,
   Target,
   Brain,
   Eye,
   Download,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  Zap,
+  Shield
 } from 'lucide-react';
 
 interface AnomalyAnalysisFilters {
@@ -58,17 +50,10 @@ interface AnomalyStatistics {
   responseTime: number;
 }
 
-interface AnomalyTrend {
-  timestamp: Date;
-  count: number;
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  type: string;
-}
+
 
 export default function AnomalyAnalysisPage() {
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
-  const [topology, setTopology] = useState<NetworkTopology | null>(null);
-  const [flows, setFlows] = useState<NetworkFlow[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -90,25 +75,22 @@ export default function AnomalyAnalysisPage() {
       setIsLoading(true);
       
       // Generate initial topology
-      const initialTopology = dataGenerator.generateTopology();
-      setTopology(initialTopology);
+      dataGenerator.generateTopology();
 
       // Generate comprehensive anomaly dataset
       const initialAnomalies: AnomalyDetection[] = [];
-      const initialFlows: NetworkFlow[] = [];
 
       // Generate 50 anomalies with diverse characteristics
       for (let i = 0; i < 50; i++) {
         const isAnomalous = Math.random() < 0.7; // 70% anomalous flows
         const flow = dataGenerator.generateFlow(isAnomalous);
-        initialFlows.push(flow);
 
         if (isAnomalous) {
           const anomaly = dataGenerator.generateAnomaly(flow);
           
           // Add some historical timestamps for timeline analysis
           const hoursAgo = Math.floor(Math.random() * 168); // Up to 7 days ago
-          anomaly.timestamp = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
+          anomaly.detectedAt = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
           
           // Vary status for realistic distribution
           const statusRandom = Math.random();
@@ -121,10 +103,9 @@ export default function AnomalyAnalysisPage() {
       }
 
       // Sort by timestamp (newest first)
-      initialAnomalies.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      initialAnomalies.sort((a, b) => b.detectedAt.getTime() - a.detectedAt.getTime());
 
       setAnomalies(initialAnomalies);
-      setFlows(initialFlows);
       setIsLoading(false);
     };
 
@@ -142,7 +123,6 @@ export default function AnomalyAnalysisPage() {
         const anomaly = dataGenerator.generateAnomaly(flow);
         
         setAnomalies(prev => [anomaly, ...prev.slice(0, 99)]); // Keep last 100
-        setFlows(prev => [flow, ...prev.slice(0, 199)]); // Keep last 200
       }
     }, 3000); // Update every 3 seconds
 
@@ -219,7 +199,7 @@ export default function AnomalyAnalysisPage() {
       }[filters.timeRange] || 24;
 
       const cutoffTime = new Date(now.getTime() - timeRangeHours * 60 * 60 * 1000);
-      if (anomaly.timestamp < cutoffTime) {
+      if (anomaly.detectedAt < cutoffTime) {
         return false;
       }
 
@@ -244,13 +224,13 @@ export default function AnomalyAnalysisPage() {
   const generateAnomalyBurst = () => {
     // Generate a burst of related anomalies for correlation analysis
     const targetIp = '192.168.1.100';
-    const anomalyTypes = ['volume', 'pattern', 'geographic'];
-    
+    const anomalyTypes: ('volume' | 'pattern' | 'geographic')[] = ['volume', 'pattern', 'geographic'];
+
     for (let i = 0; i < 15; i++) {
       setTimeout(() => {
         const flow = dataGenerator.generateFlow(true);
         flow.destinationIp = targetIp;
-        
+
         const anomaly = dataGenerator.generateAnomaly(flow);
         anomaly.type = anomalyTypes[i % anomalyTypes.length];
         anomaly.severity = i < 5 ? 'critical' : i < 10 ? 'high' : 'medium';
@@ -266,16 +246,7 @@ export default function AnomalyAnalysisPage() {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
-  const clearFilters = () => {
-    setFilters({
-      severity: [],
-      type: [],
-      status: [],
-      timeRange: '24h',
-      searchTerm: '',
-      confidence: 0
-    });
-  };
+
 
   if (isLoading) {
     return (
@@ -480,8 +451,8 @@ export default function AnomalyAnalysisPage() {
                         <Badge variant="outline" className="ml-2">{selectedAnomaly.status}</Badge>
                       </div>
                       <div>
-                        <span className="font-medium">Timestamp:</span>
-                        <span className="ml-2 text-sm">{selectedAnomaly.timestamp.toLocaleString()}</span>
+                        <span className="font-medium">Detected At:</span>
+                        <span className="ml-2 text-sm">{selectedAnomaly.detectedAt.toLocaleString()}</span>
                       </div>
                     </div>
 
@@ -489,16 +460,16 @@ export default function AnomalyAnalysisPage() {
                       <h4 className="font-medium mb-2">Network Flow</h4>
                       <div className="space-y-2 text-sm">
                         <div>
-                          <span className="font-medium">Source:</span>
-                          <span className="ml-2 font-mono">{selectedAnomaly.sourceIp}:{selectedAnomaly.sourcePort}</span>
+                          <span className="font-medium">Source IP:</span>
+                          <span className="ml-2 font-mono">{selectedAnomaly.sourceIp}</span>
                         </div>
                         <div>
-                          <span className="font-medium">Destination:</span>
-                          <span className="ml-2 font-mono">{selectedAnomaly.destinationIp}:{selectedAnomaly.destinationPort}</span>
+                          <span className="font-medium">Destination IP:</span>
+                          <span className="ml-2 font-mono">{selectedAnomaly.destinationIp}</span>
                         </div>
                         <div>
-                          <span className="font-medium">Protocol:</span>
-                          <span className="ml-2">{selectedAnomaly.protocol}</span>
+                          <span className="font-medium">Flow ID:</span>
+                          <span className="ml-2 font-mono text-xs">{selectedAnomaly.flowId}</span>
                         </div>
                       </div>
                     </div>
@@ -560,8 +531,6 @@ export default function AnomalyAnalysisPage() {
         {viewMode === 'timeline' && (
           <AnomalyTimeline
             anomalies={filteredAnomalies}
-            timeRange={filters.timeRange}
-            onTimeRangeChange={(range) => handleFilterChange({ timeRange: range })}
           />
         )}
 
@@ -572,7 +541,6 @@ export default function AnomalyAnalysisPage() {
         {viewMode === 'patterns' && (
           <AnomalyDetectionEngine
             anomalies={filteredAnomalies}
-            flows={flows}
             onAlgorithmToggle={(algorithmId) => {
               console.log('Toggle algorithm:', algorithmId);
               // Implementation for toggling algorithms
