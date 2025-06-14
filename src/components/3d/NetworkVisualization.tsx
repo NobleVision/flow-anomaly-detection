@@ -316,7 +316,7 @@ function DataFlowParticle({
   delay?: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [trailPositions, setTrailPositions] = useState<THREE.Vector3[]>([]);
+
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -329,11 +329,7 @@ function DataFlowParticle({
 
       meshRef.current.position.copy(currentPos);
 
-      // Update trail
-      setTrailPositions(prev => {
-        const newTrail = [currentPos.clone(), ...prev.slice(0, 8)];
-        return newTrail;
-      });
+      // Trail effect could be added here in the future
 
       // Fade effect based on position
       const opacity = 0.3 + Math.sin(adjustedTime * 2) * 0.4;
