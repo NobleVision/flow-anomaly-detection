@@ -38,6 +38,7 @@ export function DashboardHeader({
     { name: 'Anomaly Analysis', path: '/anomaly-analysis', active: pathname === '/anomaly-analysis' },
     { name: 'Flow Analytics', path: '/flow-analytics', active: pathname === '/flow-analytics' },
     { name: 'ML Models', path: '/ml-models', active: pathname === '/ml-models' },
+    { name: 'NetFlow Integration', path: '/netflow-integration', active: pathname === '/netflow-integration' },
   ];
 
   return (

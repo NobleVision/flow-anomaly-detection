@@ -330,3 +330,335 @@ export interface TrainingConfig {
   earlyStopping: boolean;
   patience: number;
 }
+
+// NetFlow Integration Types
+export interface NetFlowCollector {
+  id: string;
+  name: string;
+  ipAddress: string;
+  port: number;
+  protocol: 'netflow-v5' | 'netflow-v9' | 'ipfix' | 'sflow';
+  status: 'active' | 'inactive' | 'error' | 'maintenance';
+  version: string;
+  lastSeen: Date;
+  flowsPerSecond: number;
+  totalFlows: number;
+  bytesReceived: number;
+  packetsReceived: number;
+  uptime: number;
+  location?: string;
+  vendor?: string;
+  configuration: NetFlowConfig;
+  statistics: CollectorStatistics;
+}
+
+export interface NetFlowConfig {
+  samplingRate: number;
+  activeTimeout: number;
+  inactiveTimeout: number;
+  templateRefreshRate: number;
+  maxFlowsPerPacket: number;
+  enableIPv6: boolean;
+  enableMPLS: boolean;
+  enableVLAN: boolean;
+  exportFormat: 'json' | 'binary' | 'csv';
+  compressionEnabled: boolean;
+  encryptionEnabled: boolean;
+}
+
+export interface CollectorStatistics {
+  packetsReceived: number;
+  packetsDropped: number;
+  flowsProcessed: number;
+  flowsFiltered: number;
+  templatesReceived: number;
+  errorsCount: number;
+  averageProcessingTime: number;
+  memoryUsage: number;
+  cpuUsage: number;
+  diskUsage: number;
+}
+
+export interface NetFlowTemplate {
+  id: number;
+  version: string;
+  sourceId: string;
+  fieldCount: number;
+  fields: NetFlowField[];
+  receivedAt: Date;
+  lastUsed: Date;
+  usageCount: number;
+}
+
+export interface NetFlowField {
+  type: number;
+  length: number;
+  name: string;
+  description: string;
+  dataType: 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'ipv4' | 'ipv6' | 'mac' | 'string';
+}
+
+export interface NetFlowRecord {
+  id: string;
+  collectorId: string;
+  templateId: number;
+  sourceIp: string;
+  destinationIp: string;
+  sourcePort: number;
+  destinationPort: number;
+  protocol: number;
+  protocolName: string;
+  flowStartTime: Date;
+  flowEndTime: Date;
+  duration: number;
+  packets: number;
+  bytes: number;
+  flags: number;
+  tos: number;
+  inputInterface: number;
+  outputInterface: number;
+  nextHop: string;
+  sourceAS: number;
+  destinationAS: number;
+  sourceMask: number;
+  destinationMask: number;
+  vlanId?: number;
+  mplsLabel?: number;
+  engineType?: number;
+  engineId?: number;
+  samplingInterval?: number;
+  samplingAlgorithm?: number;
+  flowSequence?: number;
+  rawData: Record<string, any>;
+}
+
+export interface DataIngestionPipeline {
+  id: string;
+  name: string;
+  status: 'running' | 'stopped' | 'error' | 'maintenance';
+  type: 'netflow' | 'sflow' | 'ipfix' | 'pcap' | 'api';
+  source: string;
+  destination: string;
+  throughput: number;
+  recordsProcessed: number;
+  recordsFiltered: number;
+  recordsStored: number;
+  errorCount: number;
+  lastProcessed: Date;
+  configuration: PipelineConfig;
+  filters: DataFilter[];
+  transformations: DataTransformation[];
+  outputs: DataOutput[];
+}
+
+export interface PipelineConfig {
+  batchSize: number;
+  processingInterval: number;
+  retryAttempts: number;
+  timeoutSeconds: number;
+  enableDeduplication: boolean;
+  enableValidation: boolean;
+  enableEnrichment: boolean;
+  enableCompression: boolean;
+  bufferSize: number;
+  parallelWorkers: number;
+}
+
+export interface DataFilter {
+  id: string;
+  name: string;
+  type: 'include' | 'exclude' | 'transform';
+  field: string;
+  operator: 'equals' | 'contains' | 'regex' | 'range' | 'in' | 'not_in';
+  value: any;
+  enabled: boolean;
+}
+
+export interface DataTransformation {
+  id: string;
+  name: string;
+  type: 'field_mapping' | 'enrichment' | 'aggregation' | 'normalization';
+  sourceField: string;
+  targetField: string;
+  transformation: string;
+  parameters: Record<string, any>;
+  enabled: boolean;
+}
+
+export interface DataOutput {
+  id: string;
+  name: string;
+  type: 'elasticsearch' | 'kafka' | 'database' | 'file' | 'api';
+  endpoint: string;
+  configuration: Record<string, any>;
+  enabled: boolean;
+  recordsSent: number;
+  lastSent: Date;
+  errorCount: number;
+}
+
+// Advanced Security Types
+export interface ThreatIntelligence {
+  id: string;
+  source: string;
+  type: 'ip' | 'domain' | 'hash' | 'url' | 'signature';
+  value: string;
+  category: 'malware' | 'botnet' | 'phishing' | 'c2' | 'tor' | 'proxy' | 'scanner';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  confidence: number;
+  firstSeen: Date;
+  lastSeen: Date;
+  description: string;
+  tags: string[];
+  references: string[];
+  ttl: number;
+  isActive: boolean;
+}
+
+export interface SecurityEvent {
+  id: string;
+  timestamp: Date;
+  type: 'intrusion' | 'malware' | 'data_exfiltration' | 'lateral_movement' | 'privilege_escalation' | 'reconnaissance';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  source: string;
+  destination: string;
+  description: string;
+  indicators: ThreatIntelligence[];
+  mitreTactics: string[];
+  mitreId?: string;
+  riskScore: number;
+  status: 'open' | 'investigating' | 'resolved' | 'false_positive';
+  assignedTo?: string;
+  evidence: SecurityEvidence[];
+  relatedEvents: string[];
+}
+
+export interface SecurityEvidence {
+  id: string;
+  type: 'network_flow' | 'dns_query' | 'http_request' | 'file_hash' | 'process' | 'registry';
+  data: Record<string, any>;
+  timestamp: Date;
+  source: string;
+}
+
+export interface BehavioralProfile {
+  id: string;
+  entityId: string;
+  entityType: 'user' | 'device' | 'application' | 'network_segment';
+  entityName: string;
+  profileType: 'baseline' | 'anomaly' | 'threat';
+  timeWindow: string;
+  metrics: BehavioralMetrics;
+  patterns: BehavioralPattern[];
+  anomalies: BehavioralAnomaly[];
+  riskScore: number;
+  lastUpdated: Date;
+  confidence: number;
+}
+
+export interface BehavioralMetrics {
+  trafficVolume: {
+    average: number;
+    peak: number;
+    variance: number;
+  };
+  connectionPatterns: {
+    uniqueDestinations: number;
+    averageSessionDuration: number;
+    protocolDistribution: Record<string, number>;
+  };
+  temporalPatterns: {
+    activeHours: number[];
+    weekdayActivity: number[];
+    seasonality: number;
+  };
+  geographicPatterns: {
+    countries: string[];
+    suspiciousLocations: number;
+    travelVelocity: number;
+  };
+}
+
+export interface BehavioralPattern {
+  id: string;
+  type: 'temporal' | 'volumetric' | 'protocol' | 'geographic' | 'application';
+  description: string;
+  frequency: number;
+  confidence: number;
+  isNormal: boolean;
+  parameters: Record<string, any>;
+}
+
+export interface BehavioralAnomaly {
+  id: string;
+  type: 'volume_spike' | 'unusual_time' | 'new_destination' | 'protocol_change' | 'geographic_anomaly';
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  confidence: number;
+  timestamp: Date;
+  deviation: number;
+  baseline: number;
+  observed: number;
+  context: Record<string, any>;
+}
+
+export interface SecurityDashboard {
+  threatLevel: 'low' | 'medium' | 'high' | 'critical';
+  activeThreats: number;
+  blockedAttacks: number;
+  investigatingEvents: number;
+  riskScore: number;
+  topThreats: SecurityEvent[];
+  threatTrends: ThreatTrend[];
+  geographicThreats: GeographicThreat[];
+  mitreAttackMap: MitreAttackTechnique[];
+}
+
+export interface ThreatTrend {
+  date: Date;
+  threatCount: number;
+  severity: Record<string, number>;
+  categories: Record<string, number>;
+}
+
+export interface GeographicThreat {
+  country: string;
+  countryCode: string;
+  threatCount: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  coordinates: [number, number];
+}
+
+export interface MitreAttackTechnique {
+  id: string;
+  name: string;
+  tactic: string;
+  description: string;
+  detectionCount: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  lastDetected: Date;
+}
+
+export interface SecurityPolicy {
+  id: string;
+  name: string;
+  description: string;
+  type: 'detection' | 'prevention' | 'response' | 'compliance';
+  status: 'active' | 'inactive' | 'testing';
+  rules: SecurityRule[];
+  priority: number;
+  createdBy: string;
+  createdAt: Date;
+  lastModified: Date;
+  appliedTo: string[];
+}
+
+export interface SecurityRule {
+  id: string;
+  name: string;
+  condition: string;
+  action: 'alert' | 'block' | 'quarantine' | 'log';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  enabled: boolean;
+  parameters: Record<string, any>;
+}
