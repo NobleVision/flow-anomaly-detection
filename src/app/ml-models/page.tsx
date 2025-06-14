@@ -1,29 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MLModel, TrainingJob, ModelPerformance } from '@/types';
+import { MLModel, TrainingJob } from '@/types';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { ModelOverview } from '@/components/ml-models/ModelOverview';
 import { ModelTraining } from '@/components/ml-models/ModelTraining';
 import { ModelPerformanceMonitoring } from '@/components/ml-models/ModelPerformanceMonitoring';
 import { ModelVersioning } from '@/components/ml-models/ModelVersioning';
 import { ExplainableAI } from '@/components/ml-models/ExplainableAI';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Brain,
   Cpu,
   TrendingUp,
-  Settings,
   Play,
-  Pause,
-  RotateCcw,
   Download,
   Upload,
   GitBranch,
-  Eye,
-  Zap
+  Eye
 } from 'lucide-react';
 
 // Generate mock ML models data
@@ -401,7 +395,7 @@ export default function MLModelsPage() {
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id as any)}
+              onClick={() => setActiveTab(id as 'overview' | 'training' | 'performance' | 'versioning' | 'explainable')}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
                 activeTab === id
                   ? 'text-blue-400 border-blue-400'

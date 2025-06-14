@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { SecurityDashboard, SecurityEvent, ThreatIntelligence, BehavioralProfile } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ThreatOverview } from '@/components/security/ThreatOverview';
 import { ThreatIntelligencePanel } from '@/components/security/ThreatIntelligencePanel';
@@ -17,7 +16,6 @@ import {
   Eye,
   Brain,
   Map,
-  Settings,
   Download,
   Upload,
   Zap

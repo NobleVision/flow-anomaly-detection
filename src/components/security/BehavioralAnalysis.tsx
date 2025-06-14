@@ -179,7 +179,7 @@ export function BehavioralAnalysis({ profiles }: BehavioralAnalysisProps) {
             </div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline" className="text-xs text-green-400">
-                >80% confidence
+                {'>'}80% confidence
               </Badge>
             </div>
           </CardContent>

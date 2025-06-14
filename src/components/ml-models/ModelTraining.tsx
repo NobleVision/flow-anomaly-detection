@@ -9,18 +9,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import {
   Play,
   Square,
-  Pause,
-  RotateCcw,
   Settings,
   Activity,
   Clock,
   CheckCircle,
   XCircle,
-  AlertTriangle,
   Terminal,
-  TrendingUp,
-  Cpu,
-  MemoryStick
+  TrendingUp
 } from 'lucide-react';
 
 interface ModelTrainingProps {

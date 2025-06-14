@@ -3,7 +3,7 @@
 import { FlowAnalytics } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import {
   Zap,
   TrendingUp,
@@ -213,7 +213,7 @@ export function BandwidthMetrics({ analytics }: BandwidthMetricsProps) {
                     borderRadius: '8px',
                     color: '#f1f5f9'
                   }}
-                  formatter={(value: any, name: string) => [
+                  formatter={(value: number, name: string) => [
                     name === 'bandwidth' ? formatBytes(value) : `${value.toFixed(1)}%`,
                     name === 'bandwidth' ? 'Bandwidth' : 'Utilization'
                   ]}

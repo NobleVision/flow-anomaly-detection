@@ -7,7 +7,6 @@ import {
   Activity,
   BarChart3,
   TrendingUp,
-  TrendingDown,
   Network,
   Globe,
   Zap,

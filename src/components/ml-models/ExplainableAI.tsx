@@ -5,7 +5,7 @@ import { MLModel } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Cell, PieChart, Pie } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import {
   Eye,
   Brain,
@@ -14,7 +14,6 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Info,
   Zap,
   Search,
   Filter
@@ -129,7 +128,7 @@ export function ExplainableAI({ model }: ExplainableAIProps) {
                   key={id}
                   variant={explanationType === id ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setExplanationType(id as any)}
+                  onClick={() => setExplanationType(id as 'shap' | 'lime' | 'attention')}
                   className="flex flex-col items-start p-3 h-auto"
                 >
                   <span className="font-medium">{label}</span>
@@ -221,7 +220,7 @@ export function ExplainableAI({ model }: ExplainableAIProps) {
 
                 <div className="space-y-2">
                   <h4 className="font-medium text-white">Feature Contributions</h4>
-                  {shapValues.slice(0, 5).map((feature, index) => (
+                  {shapValues.slice(0, 5).map((feature) => (
                     <div key={feature.feature} className="flex items-center justify-between p-2 bg-slate-700/30 rounded">
                       <span className="text-sm text-white">{feature.feature}</span>
                       <div className="flex items-center gap-2">
@@ -267,7 +266,7 @@ export function ExplainableAI({ model }: ExplainableAIProps) {
 
                 <div className="space-y-3">
                   <h4 className="font-medium text-white">Local Feature Impact</h4>
-                  {shapValues.slice(0, 6).map((feature, index) => (
+                  {shapValues.slice(0, 6).map((feature) => (
                     <div key={feature.feature} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-white">{feature.feature}</span>
@@ -303,7 +302,7 @@ export function ExplainableAI({ model }: ExplainableAIProps) {
             <CardContent>
               <div className="space-y-4">
                 <div className="grid grid-cols-6 gap-2">
-                  {attentionWeights.map((step, index) => (
+                  {attentionWeights.map((step) => (
                     <div key={step.timeStep} className="text-center">
                       <div className="text-xs text-slate-400 mb-2">{step.timeStep}</div>
                       <div 
@@ -323,7 +322,7 @@ export function ExplainableAI({ model }: ExplainableAIProps) {
 
                 <div className="space-y-3">
                   <h4 className="font-medium text-white">Attention Weights by Feature</h4>
-                  {attentionWeights[attentionWeights.length - 1].features.map((feature, index) => (
+                  {attentionWeights[attentionWeights.length - 1].features.map((feature) => (
                     <div key={feature.name} className="flex items-center justify-between p-2 bg-slate-700/30 rounded">
                       <span className="text-sm text-white">{feature.name.replace(/_/g, ' ')}</span>
                       <div className="flex items-center gap-2">

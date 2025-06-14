@@ -9,8 +9,7 @@ import {
   Shield,
   Database,
   Globe,
-  Activity,
-  TrendingUp
+  Activity
 } from 'lucide-react';
 
 interface TrafficPatternAnalysisProps {
@@ -99,7 +98,7 @@ export function TrafficPatternAnalysis({ analytics }: TrafficPatternAnalysisProp
                       borderRadius: '8px',
                       color: '#f1f5f9'
                     }}
-                    formatter={(value: any, name: string) => [
+                    formatter={(value: number, name: string) => [
                       `${value.toFixed(1)}%`,
                       name
                     ]}
@@ -160,7 +159,7 @@ export function TrafficPatternAnalysis({ analytics }: TrafficPatternAnalysisProp
                     borderRadius: '8px',
                     color: '#f1f5f9'
                   }}
-                  formatter={(value: any, name: string) => [
+                  formatter={(value: number, name: string) => [
                     name === 'flows' ? formatNumber(value) : formatBytes(value),
                     name === 'flows' ? 'Flows' : 'Bytes'
                   ]}
@@ -201,7 +200,7 @@ export function TrafficPatternAnalysis({ analytics }: TrafficPatternAnalysisProp
           </h3>
           
           <div className="space-y-3">
-            {analytics.geographicDistribution.slice(0, 5).map((geo, index) => (
+            {analytics.geographicDistribution.slice(0, 5).map((geo) => (
               <div key={geo.country} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-6 bg-slate-600 rounded flex items-center justify-center">

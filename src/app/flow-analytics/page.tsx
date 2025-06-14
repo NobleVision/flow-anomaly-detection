@@ -9,19 +9,10 @@ import { TrafficPatternAnalysis } from '@/components/flow-analytics/TrafficPatte
 import { TopTalkersAnalysis } from '@/components/flow-analytics/TopTalkersAnalysis';
 import { BandwidthMetrics } from '@/components/flow-analytics/BandwidthMetrics';
 import { FlowTrendAnalysis } from '@/components/flow-analytics/FlowTrendAnalysis';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Activity,
-  BarChart3,
-  TrendingUp,
-  Network,
-  Globe,
-  Zap,
   RefreshCw,
   Download,
-  Filter,
   Calendar
 } from 'lucide-react';
 
@@ -313,7 +304,7 @@ export default function FlowAnalyticsPage() {
               <Calendar className="h-4 w-4 text-slate-400" />
               <select 
                 value={timeRange} 
-                onChange={(e) => setTimeRange(e.target.value as any)}
+                onChange={(e) => setTimeRange(e.target.value as '1h' | '6h' | '24h' | '7d' | '30d')}
                 className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm"
               >
                 <option value="1h">Last Hour</option>

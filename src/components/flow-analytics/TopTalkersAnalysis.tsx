@@ -4,16 +4,13 @@ import { FlowAnalytics } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   TrendingUp,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Globe,
-  Server,
-  Eye,
-  Filter
+  Globe
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -111,7 +108,7 @@ export function TopTalkersAnalysis({ analytics }: TopTalkersAnalysisProps) {
             <span className="text-sm text-slate-300">Sort by:</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as 'totalBytes' | 'inboundBytes' | 'outboundBytes' | 'flows')}
               className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm text-white"
             >
               <option value="totalBytes">Total Bytes</option>
@@ -125,7 +122,7 @@ export function TopTalkersAnalysis({ analytics }: TopTalkersAnalysisProps) {
             <span className="text-sm text-slate-300">Show:</span>
             <select
               value={showCount}
-              onChange={(e) => setShowCount(Number(e.target.value) as any)}
+              onChange={(e) => setShowCount(Number(e.target.value) as 10 | 15 | 20)}
               className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm text-white"
             >
               <option value={10}>Top 10</option>
@@ -162,7 +159,7 @@ export function TopTalkersAnalysis({ analytics }: TopTalkersAnalysisProps) {
                       borderRadius: '8px',
                       color: '#f1f5f9'
                     }}
-                    formatter={(value: any, name: string) => [
+                    formatter={(value: number, name: string) => [
                       formatBytes(value),
                       name === 'inbound' ? 'Inbound' : name === 'outbound' ? 'Outbound' : 'Total'
                     ]}
@@ -209,7 +206,7 @@ export function TopTalkersAnalysis({ analytics }: TopTalkersAnalysisProps) {
 
             {/* Table Rows */}
             <div className="space-y-2">
-              {sortedTalkers.map((talker, index) => {
+              {sortedTalkers.map((talker) => {
                 const traffic = getTrafficDirection(talker.inboundBytes, talker.outboundBytes);
                 const TrafficIcon = traffic.icon;
                 

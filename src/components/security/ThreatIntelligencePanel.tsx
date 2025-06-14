@@ -139,7 +139,7 @@ export function ThreatIntelligencePanel({ intelligence }: ThreatIntelligencePane
             <div className="text-2xl font-bold text-white">{highConfidence}</div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline" className="text-xs text-green-400">
-                >80% confidence
+                {'>'}80% confidence
               </Badge>
             </div>
           </CardContent>

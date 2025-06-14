@@ -4,10 +4,9 @@ import { FlowAnalytics } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar } from 'recharts';
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar } from 'recharts';
 import {
   TrendingUp,
-  Calendar,
   Clock,
   BarChart3,
   Activity,
@@ -199,7 +198,7 @@ export function FlowTrendAnalysis({ analytics }: FlowTrendAnalysisProps) {
           <div className="flex items-center gap-2">
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as any)}
+              onChange={(e) => setTimeRange(e.target.value as '1h' | '6h' | '24h' | '7d')}
               className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm text-white"
             >
               <option value="1h">Last Hour</option>
@@ -316,7 +315,7 @@ export function FlowTrendAnalysis({ analytics }: FlowTrendAnalysisProps) {
                     borderRadius: '8px',
                     color: '#f1f5f9'
                   }}
-                  formatter={(value: any) => [
+                  formatter={(value: number) => [
                     getMetricFormatter()(value),
                     metricType.charAt(0).toUpperCase() + metricType.slice(1)
                   ]}

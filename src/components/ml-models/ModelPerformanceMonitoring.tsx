@@ -3,7 +3,7 @@
 import { MLModel } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   TrendingUp,
   Activity,
@@ -13,7 +13,6 @@ import {
   Target,
   AlertTriangle,
   CheckCircle,
-  Zap,
   Database
 } from 'lucide-react';
 
@@ -68,7 +67,6 @@ export function ModelPerformanceMonitoring({ model }: ModelPerformanceMonitoring
   };
 
   const performanceData = generatePerformanceData();
-  const confusionMatrixData = generateConfusionMatrixData();
   const featureImportance = generateFeatureImportance();
 
   const getPerformanceStatus = (value: number, threshold: number) => {
