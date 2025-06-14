@@ -2,7 +2,7 @@
 
 import { Suspense, useRef, useMemo, useState, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Text, Sphere, Line, Html } from '@react-three/drei';
+import { OrbitControls, Text, Sphere, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -215,7 +215,6 @@ function NetworkNodeComponent({
         color={hovered ? "#ffffff" : "#cccccc"}
         anchorX="center"
         anchorY="middle"
-        font="/fonts/inter-bold.woff"
       >
         {node.ip.split('.').slice(-1)[0]}
       </Text>
@@ -350,25 +349,7 @@ function DataFlowParticle({
         <meshBasicMaterial color={color} transparent opacity={0.8} />
       </Sphere>
 
-      {/* Particle trail */}
-      {trailPositions.length > 1 && (
-        <points>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={trailPositions.length}
-              array={new Float32Array(trailPositions.flatMap(pos => [pos.x, pos.y, pos.z]))}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <pointsMaterial
-            color={color}
-            size={size * 0.5}
-            transparent
-            opacity={0.3}
-          />
-        </points>
-      )}
+      {/* Particle trail - simplified for now */}
     </group>
   );
 }
@@ -411,8 +392,40 @@ function DataFlowAnimation({
   );
 }
 
+// Enhanced Scene Environment
+function SceneEnvironment() {
+  return (
+    <>
+      {/* Advanced lighting setup */}
+      <ambientLight intensity={0.3} color="#1e293b" />
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={0.8}
+        color="#ffffff"
+      />
+      <pointLight position={[-10, 5, -10]} intensity={0.4} color="#3b82f6" />
+      <pointLight position={[10, -5, 10]} intensity={0.3} color="#8b5cf6" />
+
+      {/* Subtle fog for depth */}
+      <fog attach="fog" args={['#0f172a', 20, 100]} />
+
+      {/* Grid helper for reference */}
+      <gridHelper args={[20, 20, '#1e293b', '#334155']} position={[0, -5, 0]} />
+    </>
+  );
+}
+
 // Main 3D Scene Component
-function NetworkScene({ topology, anomalies }: NetworkVisualizationProps) {
+function NetworkScene({
+  topology,
+  anomalies,
+  onNodeHover,
+  onNodeUnhover
+}: NetworkVisualizationProps & {
+  onNodeHover: (node: NetworkNode, anomaly?: AnomalyDetection) => void;
+  onNodeUnhover: () => void;
+}) {
+
   // Create anomaly lookup for quick access
   const anomalyMap = useMemo(() => {
     const map = new Map<string, AnomalyDetection>();
@@ -422,12 +435,42 @@ function NetworkScene({ topology, anomalies }: NetworkVisualizationProps) {
     return map;
   }, [anomalies]);
 
+  // Enhanced edge filtering for better performance
+  const activeEdges = useMemo(() =>
+    topology.edges.filter(edge => edge.status === 'active'),
+    [topology.edges]
+  );
+
+  const anomalousEdges = useMemo(() =>
+    topology.edges.filter(edge => {
+      const sourceNode = topology.nodes.find(n => n.id === edge.source);
+      const targetNode = topology.nodes.find(n => n.id === edge.target);
+      return sourceNode && targetNode &&
+             (anomalyMap.has(sourceNode.ip) || anomalyMap.has(targetNode.ip));
+    }),
+    [topology.edges, topology.nodes, anomalyMap]
+  );
+
+
+
   return (
     <>
-      {/* Ambient lighting */}
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} />
+      <SceneEnvironment />
+
+      {/* Enhanced Controls */}
+      <OrbitControls
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        maxDistance={40}
+        minDistance={8}
+        maxPolarAngle={Math.PI * 0.8}
+        minPolarAngle={Math.PI * 0.1}
+        autoRotate={false}
+        autoRotateSpeed={0.5}
+        dampingFactor={0.05}
+        enableDamping={true}
+      />
 
       {/* Network nodes */}
       {topology.nodes.map((node) => {
@@ -437,130 +480,230 @@ function NetworkScene({ topology, anomalies }: NetworkVisualizationProps) {
             key={node.id}
             node={node}
             isAnomalous={!!anomaly}
-            anomalySeverity={anomaly?.severity}
+            anomaly={anomaly}
+            onHover={onNodeHover}
+            onUnhover={onNodeUnhover}
           />
         );
       })}
 
-      {/* Network edges */}
-      {topology.edges.map((edge) => {
+      {/* Normal Network Edges */}
+      {activeEdges.map((edge) => {
         const sourceNode = topology.nodes.find(n => n.id === edge.source);
         const targetNode = topology.nodes.find(n => n.id === edge.target);
-        
+
         if (!sourceNode || !targetNode) return null;
-        
+
         return (
           <NetworkEdgeComponent
             key={edge.id}
             start={sourceNode.position}
             end={targetNode.position}
             status={edge.status}
+            bandwidth={edge.bandwidth}
+            utilization={edge.utilization}
           />
         );
       })}
 
-      {/* Data flow animations */}
-      {topology.edges.slice(0, 5).map((edge, index) => {
+      {/* Data Flow Animations for normal traffic */}
+      {activeEdges.slice(0, 8).map((edge, index) => {
         const sourceNode = topology.nodes.find(n => n.id === edge.source);
         const targetNode = topology.nodes.find(n => n.id === edge.target);
-        
+
         if (!sourceNode || !targetNode) return null;
-        
+
         return (
           <DataFlowAnimation
             key={`flow-${index}`}
             start={sourceNode.position}
             end={targetNode.position}
+            isAnomalous={false}
           />
         );
       })}
 
-      {/* Camera controls */}
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        minDistance={5}
-        maxDistance={50}
-        autoRotate={false}
-        autoRotateSpeed={0.5}
-      />
+      {/* Enhanced Data Flow for Anomalous Connections */}
+      {anomalousEdges.map((edge, index) => {
+        const sourceNode = topology.nodes.find(n => n.id === edge.source);
+        const targetNode = topology.nodes.find(n => n.id === edge.target);
+
+        if (!sourceNode || !targetNode) return null;
+
+        return (
+          <DataFlowAnimation
+            key={`anomaly-flow-${index}`}
+            start={sourceNode.position}
+            end={targetNode.position}
+            isAnomalous={true}
+          />
+        );
+      })}
+
+      {/* Note: Hover tooltip moved outside Canvas to avoid R3F HTML issues */}
     </>
   );
 }
 
-// Loading component
+// 3D Loading component (for use inside Canvas)
 function NetworkVisualizationLoading() {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.5;
+    }
+  });
+
   return (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-        <p className="text-sm text-muted-foreground">Loading 3D Network...</p>
-      </div>
-    </div>
+    <group>
+      <Sphere ref={meshRef} args={[0.5, 8, 8]} position={[0, 0, 0]}>
+        <meshBasicMaterial color="#3b82f6" wireframe />
+      </Sphere>
+      <Text
+        position={[0, -1.5, 0]}
+        fontSize={0.3}
+        color="white"
+        anchorX="center"
+        anchorY="middle"
+      >
+        Loading...
+      </Text>
+    </group>
   );
 }
 
 // Main component
 export function NetworkVisualization({ topology, anomalies }: NetworkVisualizationProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hoveredNode, setHoveredNode] = useState<{node: NetworkNode, anomaly?: AnomalyDetection} | null>(null);
   const activeAnomalies = anomalies.filter(a => a.status === 'active');
-  
+
+  // Simulate loading
+  useMemo(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleNodeHover = useCallback((node: NetworkNode, anomaly?: AnomalyDetection) => {
+    setHoveredNode({ node, anomaly });
+  }, []);
+
+  const handleNodeUnhover = useCallback(() => {
+    setHoveredNode(null);
+  }, []);
+
   return (
     <Card className="h-[600px] relative overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold">
-          3D Network Topology
-        </CardTitle>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline">
-            {topology.nodes.length} Nodes
-          </Badge>
-          <Badge variant="outline">
-            {topology.edges.length} Connections
-          </Badge>
-          {activeAnomalies.length > 0 && (
-            <Badge variant="danger" className="animate-pulse">
-              {activeAnomalies.length} Anomalies
+      <CardHeader className="pb-3 relative z-10">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <span className="text-2xl">🌐</span>
+            3D Network Topology
+          </CardTitle>
+          <div className="flex gap-2">
+            <Badge variant="outline" className="text-xs">
+              {topology.nodes.length} Nodes
             </Badge>
-          )}
+            <Badge variant="outline" className="text-xs">
+              {topology.edges.length} Links
+            </Badge>
+            {activeAnomalies.length > 0 && (
+              <Badge variant="destructive" className="text-xs animate-pulse">
+                {activeAnomalies.length} Anomalies
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="p-0 h-[calc(100%-80px)]">
-        <div className="w-full h-full bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 rounded-lg">
+
+      <CardContent className="p-0 h-[calc(100%-80px)] relative">
+        {/* Loading overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 rounded-b-lg flex items-center justify-center z-20">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-white/70">Initializing 3D Network...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Hover tooltip */}
+        {hoveredNode && (
+          <div className="absolute top-4 left-4 z-30 pointer-events-none">
+            <NodeTooltip
+              node={hoveredNode.node}
+              isAnomalous={!!hoveredNode.anomaly}
+              anomaly={hoveredNode.anomaly}
+            />
+          </div>
+        )}
+
+        {/* 3D Canvas */}
+        <div className="w-full h-full bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 rounded-b-lg">
           <Canvas
-            camera={{ position: [15, 15, 15], fov: 60 }}
-            style={{ width: '100%', height: '100%' }}
+            camera={{
+              position: [15, 12, 15],
+              fov: 50,
+              near: 0.1,
+              far: 1000
+            }}
+            gl={{
+              antialias: true,
+              alpha: true,
+              powerPreference: "high-performance"
+            }}
           >
-            <Suspense fallback={null}>
-              <NetworkScene topology={topology} anomalies={anomalies} />
+            <Suspense fallback={<NetworkVisualizationLoading />}>
+              <NetworkScene
+                topology={topology}
+                anomalies={anomalies}
+                onNodeHover={handleNodeHover}
+                onNodeUnhover={handleNodeUnhover}
+              />
             </Suspense>
           </Canvas>
         </div>
-        
-        {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm rounded-lg p-3 space-y-2">
-          <div className="text-xs font-semibold text-foreground mb-2">Legend</div>
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-muted-foreground">Normal</span>
+
+        {/* Enhanced Legend */}
+        <div className="absolute bottom-4 left-4 bg-black/70 rounded-lg p-3 text-xs text-white space-y-2">
+          <div className="font-bold mb-2">Network Status</div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span>Normal ({topology.nodes.filter(n => n.status === 'normal').length})</span>
           </div>
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            <span className="text-muted-foreground">Warning</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <span>Warning ({topology.nodes.filter(n => n.status === 'warning').length})</span>
           </div>
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-            <span className="text-muted-foreground">Anomaly</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+            <span>Anomaly ({activeAnomalies.length})</span>
+          </div>
+          <hr className="border-white/20 my-2" />
+          <div className="text-xs text-white/70">
+            <div>💫 Particles = Data Flow</div>
+            <div>🔴 Red Particles = Anomalous Traffic</div>
           </div>
         </div>
-        
-        {/* Controls hint */}
-        <div className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-sm rounded-lg p-3">
-          <div className="text-xs text-muted-foreground">
-            <div>🖱️ Drag to rotate</div>
-            <div>🔍 Scroll to zoom</div>
-            <div>⌨️ Right-click to pan</div>
+
+        {/* Enhanced Controls hint */}
+        <div className="absolute bottom-4 right-4 bg-black/70 rounded-lg p-3">
+          <div className="text-xs text-white/70">
+            <div className="font-bold text-white mb-1">Controls</div>
+            <div>🖱️ Left: Rotate view</div>
+            <div>🔍 Wheel: Zoom in/out</div>
+            <div>🖱️ Right: Pan camera</div>
+            <div>🎯 Hover: Node details</div>
+          </div>
+        </div>
+
+        {/* Performance indicator */}
+        <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-2 py-1">
+          <div className="text-xs text-green-400 flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span>3D Rendering Active</span>
           </div>
         </div>
       </CardContent>

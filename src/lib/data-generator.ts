@@ -35,31 +35,180 @@ export class NetworkDataGenerator {
   private anomalyCounter = 0;
   private alarmCounter = 0;
 
-  // Generate network topology
-  generateTopology(nodeCount: number = 50): NetworkTopology {
+  // Generate realistic enterprise network topology
+  generateTopology(nodeCount: number = 25): NetworkTopology {
     const nodes: NetworkNode[] = [];
     const edges: NetworkEdge[] = [];
 
-    // Generate nodes
-    for (let i = 0; i < nodeCount; i++) {
-      nodes.push(this.generateNode());
-    }
+    // Core Infrastructure
+    const coreRouter = this.createSpecificNode('core-router-01', '10.0.0.1', 'core-rtr-01.corp.local', 'router', 'normal', [0, 0, 0]);
+    const coreSwitch = this.createSpecificNode('core-switch-01', '10.0.0.10', 'core-sw-01.corp.local', 'switch', 'normal', [4, 0, 0]);
+    const firewall = this.createSpecificNode('firewall-01', '10.0.0.254', 'fw-01.corp.local', 'firewall', 'normal', [-4, 0, 0]);
 
-    // Generate edges (connections between nodes)
-    for (let i = 0; i < nodes.length; i++) {
-      const connectionsCount = Math.floor(Math.random() * 5) + 1;
-      for (let j = 0; j < connectionsCount; j++) {
-        const targetIndex = Math.floor(Math.random() * nodes.length);
-        if (targetIndex !== i) {
-          edges.push(this.generateEdge(nodes[i].id, nodes[targetIndex].id));
-        }
-      }
-    }
+    nodes.push(coreRouter, coreSwitch, firewall);
+
+    // DMZ Servers
+    const webServer = this.createSpecificNode('web-server-01', '192.168.100.10', 'web-01.dmz.local', 'server', 'normal', [-6, 2, 2]);
+    const mailServer = this.createSpecificNode('mail-server-01', '192.168.100.20', 'mail-01.dmz.local', 'server', 'warning', [-6, -2, 2]);
+    const dnsServer = this.createSpecificNode('dns-server-01', '192.168.100.30', 'dns-01.dmz.local', 'server', 'normal', [-6, 0, 4]);
+
+    nodes.push(webServer, mailServer, dnsServer);
+
+    // Internal Servers
+    const dbServer = this.createSpecificNode('db-server-01', '10.1.0.10', 'db-01.internal.local', 'server', 'critical', [6, 2, 2]);
+    const appServer = this.createSpecificNode('app-server-01', '10.1.0.20', 'app-01.internal.local', 'server', 'normal', [6, -2, 2]);
+    const fileServer = this.createSpecificNode('file-server-01', '10.1.0.30', 'file-01.internal.local', 'server', 'normal', [6, 0, 4]);
+
+    nodes.push(dbServer, appServer, fileServer);
+
+    // Department Switches
+    const hrSwitch = this.createSpecificNode('hr-switch-01', '10.2.1.1', 'hr-sw-01.corp.local', 'switch', 'normal', [2, 4, -2]);
+    const itSwitch = this.createSpecificNode('it-switch-01', '10.2.2.1', 'it-sw-01.corp.local', 'switch', 'normal', [2, -4, -2]);
+    const financeSwitch = this.createSpecificNode('finance-switch-01', '10.2.3.1', 'fin-sw-01.corp.local', 'switch', 'warning', [-2, 4, -2]);
+
+    nodes.push(hrSwitch, itSwitch, financeSwitch);
+
+    // Workstations
+    const hrWs1 = this.createSpecificNode('hr-ws-01', '10.2.1.100', 'hr-ws-01.corp.local', 'client', 'normal', [3, 6, -4]);
+    const hrWs2 = this.createSpecificNode('hr-ws-02', '10.2.1.101', 'hr-ws-02.corp.local', 'client', 'normal', [1, 6, -4]);
+    const itWs1 = this.createSpecificNode('it-ws-01', '10.2.2.100', 'it-ws-01.corp.local', 'client', 'normal', [3, -6, -4]);
+    const itWs2 = this.createSpecificNode('it-ws-02', '10.2.2.101', 'it-ws-02.corp.local', 'client', 'warning', [1, -6, -4]);
+    const finWs1 = this.createSpecificNode('finance-ws-01', '10.2.3.100', 'fin-ws-01.corp.local', 'client', 'normal', [-3, 6, -4]);
+    const finWs2 = this.createSpecificNode('finance-ws-02', '10.2.3.101', 'fin-ws-02.corp.local', 'client', 'critical', [-1, 6, -4]);
+
+    nodes.push(hrWs1, hrWs2, itWs1, itWs2, finWs1, finWs2);
+
+    // IoT and Edge Devices
+    const iotSensor = this.createSpecificNode('iot-sensor-01', '172.16.1.10', 'temp-sensor-01', 'client', 'normal', [0, 2, -6]);
+    const iotCamera = this.createSpecificNode('iot-camera-01', '172.16.1.20', 'security-cam-01', 'client', 'normal', [0, -2, -6]);
+    const printer = this.createSpecificNode('printer-01', '172.16.2.10', 'printer-01.corp.local', 'client', 'normal', [2, 0, -6]);
+
+    nodes.push(iotSensor, iotCamera, printer);
+
+    // Guest Network
+    const guestAp = this.createSpecificNode('guest-ap-01', '192.168.200.1', 'guest-ap-01', 'router', 'normal', [-2, -4, -2]);
+    const guestDevice = this.createSpecificNode('guest-device-01', '192.168.200.100', 'guest-laptop-01', 'client', 'normal', [-3, -6, -4]);
+
+    nodes.push(guestAp, guestDevice);
+
+    // Backup and Storage
+    const backupServer = this.createSpecificNode('backup-server-01', '10.1.1.10', 'backup-01.internal.local', 'server', 'normal', [8, 0, 0]);
+    const nas = this.createSpecificNode('nas-01', '10.1.1.20', 'nas-01.internal.local', 'server', 'normal', [8, 2, -2]);
+
+    nodes.push(backupServer, nas);
+
+    // Generate realistic network connections
+    const connections = [
+      // Core Infrastructure
+      [firewall.id, coreRouter.id, 10000, 45.2],
+      [coreRouter.id, coreSwitch.id, 10000, 67.8],
+
+      // DMZ Connections
+      [firewall.id, webServer.id, 1000, 78.5],
+      [firewall.id, mailServer.id, 1000, 89.3],
+      [firewall.id, dnsServer.id, 1000, 34.2],
+
+      // Internal Server Connections
+      [coreSwitch.id, dbServer.id, 1000, 95.7],
+      [coreSwitch.id, appServer.id, 1000, 67.4],
+      [coreSwitch.id, fileServer.id, 1000, 45.8],
+
+      // Department Switches
+      [coreSwitch.id, hrSwitch.id, 1000, 23.7],
+      [coreSwitch.id, itSwitch.id, 1000, 31.4],
+      [coreSwitch.id, financeSwitch.id, 1000, 89.6],
+
+      // Workstations
+      [hrSwitch.id, hrWs1.id, 100, 45.2],
+      [hrSwitch.id, hrWs2.id, 100, 32.1],
+      [itSwitch.id, itWs1.id, 100, 78.9],
+      [itSwitch.id, itWs2.id, 100, 91.7],
+      [financeSwitch.id, finWs1.id, 100, 56.3],
+      [financeSwitch.id, finWs2.id, 100, 98.4],
+
+      // IoT Devices
+      [coreRouter.id, iotSensor.id, 10, 5.2],
+      [coreRouter.id, iotCamera.id, 100, 23.7],
+      [hrSwitch.id, printer.id, 100, 8.9],
+
+      // Guest Network
+      [firewall.id, guestAp.id, 100, 34.5],
+      [guestAp.id, guestDevice.id, 100, 67.2],
+
+      // Storage
+      [coreSwitch.id, backupServer.id, 1000, 23.4],
+      [coreSwitch.id, nas.id, 1000, 12.8],
+
+      // Cross-connections
+      [dbServer.id, appServer.id, 1000, 45.6],
+      [appServer.id, fileServer.id, 1000, 34.7],
+      [backupServer.id, nas.id, 1000, 67.8]
+    ];
+
+    // Create edges from connections
+    connections.forEach(([sourceId, targetId, bandwidth, utilization], index) => {
+      const status = utilization > 85 ? 'congested' : utilization < 10 ? 'inactive' : 'active';
+      edges.push({
+        id: `edge-${index + 1}`,
+        source: sourceId as string,
+        target: targetId as string,
+        type: 'physical',
+        bandwidth: bandwidth as number,
+        latency: Math.random() * 10 + 1,
+        utilization: utilization as number,
+        status: status as 'active' | 'inactive' | 'congested'
+      });
+    });
 
     return {
       nodes,
       edges,
       lastUpdated: new Date(),
+    };
+  }
+
+  // Helper method to create specific nodes
+  private createSpecificNode(
+    id: string,
+    ip: string,
+    hostname: string,
+    type: NetworkNode['type'],
+    status: NetworkNode['status'],
+    position: [number, number, number]
+  ): NetworkNode {
+    const baseMetrics = {
+      server: { cpu: 60 + Math.random() * 30, memory: 70 + Math.random() * 25, connections: 50 + Math.random() * 100 },
+      router: { cpu: 30 + Math.random() * 20, memory: 40 + Math.random() * 20, connections: 100 + Math.random() * 150 },
+      switch: { cpu: 15 + Math.random() * 15, memory: 25 + Math.random() * 20, connections: 30 + Math.random() * 70 },
+      firewall: { cpu: 40 + Math.random() * 30, memory: 50 + Math.random() * 30, connections: 150 + Math.random() * 100 },
+      client: { cpu: 20 + Math.random() * 60, memory: 30 + Math.random() * 50, connections: 5 + Math.random() * 20 }
+    };
+
+    const metrics = baseMetrics[type];
+
+    // Adjust metrics based on status
+    if (status === 'critical') {
+      metrics.cpu = Math.min(95 + Math.random() * 5, 100);
+      metrics.memory = Math.min(90 + Math.random() * 10, 100);
+    } else if (status === 'warning') {
+      metrics.cpu = Math.min(80 + Math.random() * 15, 95);
+      metrics.memory = Math.min(75 + Math.random() * 20, 90);
+    }
+
+    return {
+      id,
+      ip,
+      hostname,
+      type,
+      position,
+      status,
+      metrics: {
+        cpu: metrics.cpu,
+        memory: metrics.memory,
+        bandwidth: Math.random() * 1000,
+        connections: Math.floor(metrics.connections),
+      },
+      lastSeen: new Date(),
     };
   }
 
