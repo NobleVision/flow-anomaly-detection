@@ -29,7 +29,7 @@ export function ExplainableAI({ model }: ExplainableAIProps) {
 
   // Generate SHAP values for feature importance
   const generateSHAPValues = () => {
-    return model.features.map((feature, index) => ({
+    return model.features.map((feature) => ({
       feature: feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       shapValue: (Math.random() - 0.5) * 2, // Values between -1 and 1
       importance: Math.random() * 0.8 + 0.2,

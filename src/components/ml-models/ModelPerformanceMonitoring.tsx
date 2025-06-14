@@ -46,16 +46,7 @@ export function ModelPerformanceMonitoring({ model }: ModelPerformanceMonitoring
     return data;
   };
 
-  // Generate confusion matrix visualization data
-  const generateConfusionMatrixData = () => {
-    const matrix = model.performance.confusionMatrix;
-    return [
-      { name: 'True Positive', value: matrix[1][1], color: '#10B981' },
-      { name: 'False Positive', value: matrix[0][1], color: '#F59E0B' },
-      { name: 'False Negative', value: matrix[1][0], color: '#EF4444' },
-      { name: 'True Negative', value: matrix[0][0], color: '#3B82F6' }
-    ];
-  };
+
 
   // Generate feature importance data
   const generateFeatureImportance = () => {

@@ -429,7 +429,7 @@ export interface NetFlowRecord {
   samplingInterval?: number;
   samplingAlgorithm?: number;
   flowSequence?: number;
-  rawData: Record<string, any>;
+  rawData: Record<string, unknown>;
 }
 
 export interface DataIngestionPipeline {
@@ -470,7 +470,7 @@ export interface DataFilter {
   type: 'include' | 'exclude' | 'transform';
   field: string;
   operator: 'equals' | 'contains' | 'regex' | 'range' | 'in' | 'not_in';
-  value: any;
+  value: string | number | boolean | string[] | number[];
   enabled: boolean;
 }
 
@@ -481,7 +481,7 @@ export interface DataTransformation {
   sourceField: string;
   targetField: string;
   transformation: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   enabled: boolean;
 }
 
@@ -490,7 +490,7 @@ export interface DataOutput {
   name: string;
   type: 'elasticsearch' | 'kafka' | 'database' | 'file' | 'api';
   endpoint: string;
-  configuration: Record<string, any>;
+  configuration: Record<string, unknown>;
   enabled: boolean;
   recordsSent: number;
   lastSent: Date;
@@ -536,7 +536,7 @@ export interface SecurityEvent {
 export interface SecurityEvidence {
   id: string;
   type: 'network_flow' | 'dns_query' | 'http_request' | 'file_hash' | 'process' | 'registry';
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: Date;
   source: string;
 }
@@ -586,7 +586,7 @@ export interface BehavioralPattern {
   frequency: number;
   confidence: number;
   isNormal: boolean;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface BehavioralAnomaly {
@@ -599,7 +599,7 @@ export interface BehavioralAnomaly {
   deviation: number;
   baseline: number;
   observed: number;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
 }
 
 export interface SecurityDashboard {
@@ -660,5 +660,5 @@ export interface SecurityRule {
   action: 'alert' | 'block' | 'quarantine' | 'log';
   severity: 'low' | 'medium' | 'high' | 'critical';
   enabled: boolean;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }

@@ -9,12 +9,11 @@ import {
   AlertTriangle,
   Clock,
   Settings,
-  Download,
-  Upload,
   FileText,
   Code,
   Database,
-  Zap
+  Zap,
+  Download
 } from 'lucide-react';
 
 interface ProtocolInfo {

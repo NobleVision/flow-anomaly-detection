@@ -83,7 +83,7 @@ export default function FlowAnalyticsPage() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'1h' | '6h' | '24h' | '7d' | '30d'>('24h');
-  const [refreshInterval, setRefreshInterval] = useState<number>(30000);
+  const [refreshInterval] = useState<number>(30000);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Generate comprehensive flow analytics data

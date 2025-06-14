@@ -4,14 +4,12 @@ import { useState } from 'react';
 import { BehavioralProfile } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar } from 'recharts';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import {
   Brain,
   User,
   Monitor,
   Globe,
-  Clock,
   TrendingUp,
   AlertTriangle,
   Activity,
@@ -97,14 +95,7 @@ export function BehavioralAnalysis({ profiles }: BehavioralAnalysisProps) {
     ];
   };
 
-  // Generate activity timeline data
-  const generateActivityTimeline = (profile: BehavioralProfile) => {
-    return profile.metrics.temporalPatterns.activeHours.map(hour => ({
-      hour: `${hour}:00`,
-      activity: Math.random() * 100,
-      baseline: 50 + Math.random() * 30
-    }));
-  };
+
 
   // Generate protocol distribution data
   const generateProtocolData = (profile: BehavioralProfile) => {

@@ -16,9 +16,7 @@ import {
   Upload,
   Copy,
   CheckCircle,
-  AlertTriangle,
-  Play,
-  Pause
+  Play
 } from 'lucide-react';
 
 interface ModelVersioningProps {
