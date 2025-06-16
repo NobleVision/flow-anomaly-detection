@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flow Anomaly Detection | Broadcom DX NetOps NFA",
+  title: "Flow Anomaly Detection | Noble Vision, Inc.",
   description: "AI-powered network flow anomaly detection system with real-time monitoring and 3D visualization",
   keywords: ["network monitoring", "anomaly detection", "AI", "NetOps", "flow analysis"],
-  authors: [{ name: "Team Futurama" }],
+  authors: [{ name: "Noble Vision NMS Monitoring Team" }],
 };
 
 export default function RootLayout({

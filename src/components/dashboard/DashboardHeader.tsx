@@ -57,7 +57,7 @@ export function DashboardHeader({
                   Flow Anomaly Detection
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Broadcom DX NetOps NFA • Team Futurama
+                  Noble Vision, Inc. • Noble Vision NMS Monitoring Team
                 </p>
               </div>
             </div>
